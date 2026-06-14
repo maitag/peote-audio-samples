@@ -1,9 +1,9 @@
 package;
 
-import haxe.io.Float32Array;
 import haxe.CallStack;
 import haxe.io.BytesInput;
 import haxe.io.Bytes;
+import haxe.io.Float32Array;
 
 import lime.app.Application;
 import lime.ui.Window;
@@ -104,8 +104,16 @@ class Main extends Application {
 		
 		var buffer = new AudioBuffer(wav.data.length/44100);
 
-		// TODO:
-		// buffer.setData( Float32Array.fromBytes(wav.data) );
+		// convert Int16Arary wav.data to Flaot32Array:
+		var wavF = new Float32Array(wav.data.length>>1);
+		for (i in 0...wavF.length) {
+			var v:Int =  (wav.data.get((i<<1)+1) << 8) | wav.data.get(i<<1);
+			if (v & 0x8000 != 0) v = v - 0x10000;
+			wavF.set( i, v / 32767 );
+		}
+
+		buffer.setData( wavF );
+		
 
 		var source = new AudioSource(buffer);
 
@@ -120,7 +128,32 @@ class Main extends Application {
 	}
 
 
-	
+	/*import lime.media.vorbis.VorbisFile;
+import lime.utils.Bytes;
+
+class Decoder {
+    public static function decodeOggManually(filePath:String) {
+        // Open the OGG file container using Lime's VorbisFile binding
+        var vorbisFile = VorbisFile.fromFile(filePath);
+        
+        if (vorbisFile != null) {
+            var totalSamples = vorbisFile.pcmTotal();
+            trace("Total PCM Samples: " + totalSamples);
+            
+            // Allocate a buffer for a chunk of raw data
+            var bufferSize = 4096;
+            var bytes = Bytes.alloc(bufferSize);
+            
+            // Read decoded PCM chunks
+            // read(buffer, byteOffset, length, bigEndian, wordSize, signed)
+            var bytesRead = vorbisFile.read(bytes, 0, bufferSize, false, 2, true);
+            
+            trace("Decoded chunk size in bytes: " + bytesRead);
+            vorbisFile.close();
+        }
+    }
+}
+	*/
 	// ------------------------------------------------------------
 	// ----------------- LIME EVENTS ------------------------------
 	// ------------------------------------------------------------	
