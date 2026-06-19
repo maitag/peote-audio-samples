@@ -1,5 +1,6 @@
 package;
 
+import haxe.Timer;
 import haxe.CallStack;
 import haxe.io.BytesInput;
 import haxe.io.Bytes;
@@ -16,8 +17,8 @@ import peote.view.Color;
 import peote.view.Load;
 
 import peote.audio.PeoteAudio;
-import peote.audio.PeoteAudio.AudioSource;
-import peote.audio.PeoteAudio.AudioBuffer;
+import peote.audio.AudioSource;
+import peote.audio.AudioBuffer;
 
 
 class Main extends Application {
@@ -42,7 +43,6 @@ class Main extends Application {
 		peoteView = new PeoteView(window);
 		display = new Display(0, 0, window.width, window.height, Color.BLACK);
 		peoteView.addDisplay(display);
-
 		loadSound();
 	}
 
@@ -115,45 +115,24 @@ class Main extends Application {
 		buffer.setData( wavF );
 		
 
+		
 		var source = new AudioSource(buffer);
-
 		source.play();
 
-		// to test MULTIPLE:
-		window.onMouseDown.add((x, y, button) -> { 
-			
-		});
+		var source1 = new AudioSource(buffer);
+		source1.playDelay(5);
 		
+		var timestamp = Timer.stamp();
+		var source2 = new AudioSource(buffer);
+		source2.playFromTo(timestamp+2.0, timestamp + 3.0);
+
+		// to test MULTIPLE:
+		window.onMouseDown.add((x, y, button) -> {});
 
 	}
 
 
-	/*import lime.media.vorbis.VorbisFile;
-import lime.utils.Bytes;
 
-class Decoder {
-    public static function decodeOggManually(filePath:String) {
-        // Open the OGG file container using Lime's VorbisFile binding
-        var vorbisFile = VorbisFile.fromFile(filePath);
-        
-        if (vorbisFile != null) {
-            var totalSamples = vorbisFile.pcmTotal();
-            trace("Total PCM Samples: " + totalSamples);
-            
-            // Allocate a buffer for a chunk of raw data
-            var bufferSize = 4096;
-            var bytes = Bytes.alloc(bufferSize);
-            
-            // Read decoded PCM chunks
-            // read(buffer, byteOffset, length, bigEndian, wordSize, signed)
-            var bytesRead = vorbisFile.read(bytes, 0, bufferSize, false, 2, true);
-            
-            trace("Decoded chunk size in bytes: " + bytesRead);
-            vorbisFile.close();
-        }
-    }
-}
-	*/
 	// ------------------------------------------------------------
 	// ----------------- LIME EVENTS ------------------------------
 	// ------------------------------------------------------------	
@@ -162,7 +141,9 @@ class Decoder {
 	// override function onPreloadComplete():Void {}
 
 	// for game-logic update
-	// override function update(deltaTime:Int):Void {}
+	override function update(deltaTime:Int):Void {
+		PeoteAudio.update();
+	}
 
 	// override function render(context:lime.graphics.RenderContext):Void {}
 	// override function onRenderContextLost ():Void trace(" --- WARNING: LOST RENDERCONTEXT --- ");		
